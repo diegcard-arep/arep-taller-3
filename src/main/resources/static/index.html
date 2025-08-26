@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HTTP Server Demo - AREP Exercise</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="icon" href="logo.svg" type="image/svg+xml">
+</head>
+<body>
+    <header>
+        <div class="container">
+            <img src="logo.svg" alt="Logo" class="logo">
+            <h1>Servidor HTTP Distribuido</h1>
+            <p class="subtitle">Ejercicio de Arquitecturas Empresariales (AREP)</p>
+            <p class="subtitle">Desarrollado por Diego Cardenas</p>
+        </div>
+    </header>
+
+    <main class="container">
+        <section class="card">
+            <h2>📝 Formularios de Prueba</h2>
+            
+            <div class="form-section">
+                <h3>GET Request</h3>
+                <form class="form-horizontal">
+                    <div class="form-group">
+                        <label for="name">Nombre:</label>
+                        <input type="text" id="name" name="name" value="Juan" placeholder="Ingresa tu nombre">
+                        <button type="button" onclick="loadGetMsg()" class="btn btn-primary">Enviar GET</button>
+                    </div>
+                </form>
+                <div id="getrespmsg" class="response-area"></div>
+            </div>
+
+            <div class="form-section">
+                <h3>POST Request</h3>
+                <form class="form-horizontal">
+                    <div class="form-group">
+                        <label for="postname">Nombre:</label>
+                        <input type="text" id="postname" name="name" value="María" placeholder="Ingresa tu nombre">
+                        <button type="button" onclick="loadPostMsg()" class="btn btn-secondary">Enviar POST</button>
+                    </div>
+                </form>
+                <div id="postrespmsg" class="response-area"></div>
+            </div>
+        </section>
+
+        <section class="card">
+            <h2>🌐 Servicios REST Simulados</h2>
+            
+            <div class="service-grid">
+                <div class="service-item">
+                    <h3>🌤️ Clima</h3>
+                    <p>Obtener información simulada del clima de Bogotá</p>
+                    <button onclick="getWeather()" class="btn btn-success">Obtener Clima</button>
+                    <div id="weather-result" class="response-area"></div>
+                </div>
+
+                <div class="service-item">
+                    <h3>💭 Cita Inspiradora</h3>
+                    <p>Obtener una cita aleatoria motivacional (simulada)</p>
+                    <button onclick="getQuote()" class="btn btn-info">Obtener Cita</button>
+                    <div id="quote-result" class="response-area"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Sección de demostración de archivos -->
+        <section class="card">
+            <h2>📁 Tipos de Archivos Soportados</h2>
+            
+            <div class="file-demo">
+                <div class="file-type">
+                    <h4>Imágenes</h4>
+                    <p>El servidor puede servir archivos SVG, PNG, JPG, GIF, etc.</p>
+                    <img src="logo.svg" alt="Imagen SVG de ejemplo" class="demo-image">
+                </div>
+
+                <div class="file-type">
+                    <h4>Hojas de Estilo</h4>
+                    <p>Archivos CSS para estilizar la aplicación</p>
+                    <code>styles.css</code> - Actualmente cargado
+                </div>
+
+                <div class="file-type">
+                    <h4>JavaScript</h4>
+                    <p>Scripts para funcionalidad interactiva</p>
+                    <code>app.js</code> - Cargado dinámicamente
+                </div>
+            </div>
+        </section>
+
+        <!-- Información del servidor -->
+        <section class="card">
+            <h2>ℹ️ Información del Servidor</h2>
+            <div class="server-info">
+                <p><strong>Puerto:</strong> 35000</p>
+                <p><strong>Protocolo:</strong> HTTP/1.1</p>
+                <p><strong>Características:</strong></p>
+                <ul>
+                    <li>✅ Manejo de múltiples tipos de archivo</li>
+                    <li>✅ Servicios REST simulados integrados</li>
+                    <li>✅ Cache de archivos estáticos</li>
+                    <li>✅ Manejo de errores HTTP</li>
+                    <li>✅ Comunicación asíncrona con JavaScript</li>
+                    <li>✅ Implementación simple sin frameworks externos</li>
+                </ul>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2025 - Arquitecturas Empresariales (AREP) - Servidor HTTP Distribuido</p>
+        </div>
+    </footer>
+
+    <script src="app.js"></script>
+</body>
+</html>

@@ -21,6 +21,7 @@ import java.util.logging.Logger;
 
 import com.escuelaing.arep.config.ServerConfig;
 import com.escuelaing.arep.framework.RouteInfo;
+import com.escuelaing.arep.utils.ClassScanner;
 
 /**
  * HTTP Server secuencial con soporte de archivos estáticos y rutas anotadas
@@ -44,6 +45,21 @@ public class HttpServer {
         server.start();
     }
 
+    /**
+     * Starts the HTTP server, loading annotated controllers and listening for incoming client connections.
+     * <p>
+     * The server will:
+     * <ul>
+     *   <li>Load all controllers annotated for route handling.</li>
+     *   <li>Bind to the port specified in {@link ServerConfig}.</li>
+     *   <li>Log server startup information, including registered routes and web root directory.</li>
+     *   <li>Accept and handle incoming client requests in a loop while the server is running.</li>
+     *   <li>Gracefully handle IO exceptions during client request processing and server startup.</li>
+     *   <li>Stop the server and log shutdown information when finished.</li>
+     * </ul>
+     *
+     * @throws IOException if an I/O error occurs when opening the server socket or handling requests.
+     */
     public void start() throws IOException {
         // Cargar controladores anotados
         loadControllers();
@@ -75,10 +91,24 @@ public class HttpServer {
         }
     }
 
+    /**
+     * Stops the HTTP server by setting the running flag to false.
+     * This method should be called to gracefully shut down the server loop.
+     */
     private void stop() {
         running = false;
     }
 
+    /**
+     * Sets the directory from which static files will be served by the HTTP server.
+     * <p>
+     * If the provided directory path starts with a '/', it is treated as an absolute path
+     * relative to the "target/classes" directory of the current working directory.
+     * Otherwise, it is treated as a relative path from the current working directory.
+     * The method also logs the updated static files directory.
+     *
+     * @param directory the path to the static files directory, either absolute or relative
+     */
     public static void setStaticFilesDirectory(String directory) {
         if (directory.startsWith("/")) {
             WEB_ROOT = System.getProperty("user.dir") + "/target/classes" + directory;
@@ -88,6 +118,21 @@ public class HttpServer {
         LOGGER.log(Level.INFO, "Static files directory updated to: {0}", WEB_ROOT);
     }
 
+    /**
+     * Handles an incoming HTTP request from a client socket.
+     * <p>
+     * This method reads the request line and headers, determines the request method and path,
+     * and processes the request accordingly:
+     * <ul>
+     *   <li>If the request matches a registered route (annotated with @GetMapping), it invokes the corresponding handler.</li>
+     *   <li>If the request is for the root path ("/") or a static file, it serves the appropriate file.</li>
+     *   <li>If the request is malformed, it sends a 400 Bad Request response.</li>
+     *   <li>If an error occurs during route invocation, it sends a 500 Internal Server Error response.</li>
+     * </ul>
+     *
+     * @param clientSocket the socket connected to the client making the request
+     * @throws IOException if an I/O error occurs while reading the request or writing the response
+     */
     private void handleRequest(Socket clientSocket) throws IOException {
         BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
         OutputStream out = clientSocket.getOutputStream();
@@ -140,6 +185,13 @@ public class HttpServer {
         }
     }
 
+    /**
+     * Scans for REST controller classes within the specified package and registers their routes.
+     * For each controller class found, it creates an instance and inspects its methods for the
+     * {@link com.escuelaing.arep.annotations.GetMapping} annotation. If present, the method's route
+     * path is extracted and mapped to a {@link RouteInfo} object containing the path, method, and instance.
+     * Any exceptions during controller instantiation or registration are logged as warnings.
+     */
     private void loadControllers() {
         List<Class<?>> controllers = ClassScanner.findRestControllers("com.escuelaing.arep.controllers");
         for (Class<?> controllerClass : controllers) {
@@ -157,6 +209,17 @@ public class HttpServer {
         }
     }
 
+    /**
+     * Parses the query parameters from a given URL path.
+     * <p>
+     * This method extracts the query string from the provided {@code fullPath},
+     * splits it into key-value pairs, decodes each parameter using UTF-8 encoding,
+     * and stores them in a map. If decoding fails, the raw key and value are used.
+     * </p>
+     *
+     * @param fullPath the full URL path, potentially containing query parameters
+     * @return a map containing the decoded query parameter names and values
+     */
     private Map<String, String> parseQueryParams(String fullPath) {
         Map<String, String> params = new HashMap<>();
         if (fullPath.contains("?")) {
@@ -177,6 +240,19 @@ public class HttpServer {
         return params;
     }
 
+    /**
+     * Serves a static file from the server's web root directory to the client via the provided OutputStream.
+     * <p>
+     * This method sanitizes the requested path to prevent directory traversal attacks, checks if the file exists
+     * and is not a directory, and then attempts to read and cache the file's contents. If the file is found,
+     * it sends the file with the appropriate MIME type as an HTTP response. If the file is not found or an error
+     * occurs during reading, it sends an appropriate HTTP error response.
+     * </p>
+     *
+     * @param out  the OutputStream to write the HTTP response to
+     * @param path the requested file path relative to the web root
+     * @throws IOException if an I/O error occurs while serving the file
+     */
     private void serveFile(OutputStream out, String path) throws IOException {
         path = path.replace("..", "").replace("//", "/");
         if (!path.startsWith("/")) {
@@ -210,6 +286,27 @@ public class HttpServer {
         }
     }
 
+    /**
+     * Returns the MIME type for a given file name based on its extension.
+     * <p>
+     * Supported extensions and their MIME types:
+     * <ul>
+     *   <li>.html, .htm - text/html</li>
+     *   <li>.css - text/css</li>
+     *   <li>.js - application/javascript</li>
+     *   <li>.png - image/png</li>
+     *   <li>.jpg, .jpeg - image/jpeg</li>
+     *   <li>.gif - image/gif</li>
+     *   <li>.svg - image/svg+xml</li>
+     *   <li>.ico - image/x-icon</li>
+     *   <li>.txt - text/plain</li>
+     * </ul>
+     * If the file name is null, empty, or has an unsupported extension,
+     * returns "application/octet-stream" as the default MIME type.
+     *
+     * @param fileName the name of the file whose MIME type is to be determined
+     * @return the corresponding MIME type as a String
+     */
     private String getSimpleMimeType(String fileName) {
         if (fileName == null || fileName.isEmpty()) {
             return "application/octet-stream";
@@ -238,6 +335,15 @@ public class HttpServer {
         }
     }
 
+    /**
+     * Sends an HTTP response to the client through the provided OutputStream.
+     *
+     * @param out         the OutputStream to write the response to
+     * @param statusCode  the HTTP status code to send (e.g., 200, 404)
+     * @param contentType the MIME type of the response content (e.g., "text/html")
+     * @param content     the response body as a byte array
+     * @throws IOException if an I/O error occurs while writing the response
+     */
     private void sendResponse(OutputStream out, int statusCode, String contentType, byte[] content) throws IOException {
         PrintWriter writer = new PrintWriter(new OutputStreamWriter(out, StandardCharsets.UTF_8));
         writer.print("HTTP/1.1 " + statusCode + " " + getStatusMessage(statusCode) + "\r\n");
@@ -253,6 +359,14 @@ public class HttpServer {
         out.flush();
     }
 
+    /**
+     * Sends an HTTP error response to the client with a formatted HTML error page.
+     *
+     * @param out        the OutputStream to write the response to
+     * @param statusCode the HTTP status code to send (e.g., 404, 500)
+     * @param message    the error message to display in the response
+     * @throws IOException if an I/O error occurs while writing the response
+     */
     private void sendErrorResponse(OutputStream out, int statusCode, String message) throws IOException {
         String errorHtml = String.format("""
                 <!DOCTYPE html>
@@ -278,6 +392,12 @@ public class HttpServer {
         sendResponse(out, statusCode, "text/html", errorHtml.getBytes(StandardCharsets.UTF_8));
     }
 
+    /**
+     * Returns the HTTP status message corresponding to the provided status code.
+     *
+     * @param statusCode the HTTP status code (e.g., 200, 400, 404, 500)
+     * @return the status message as a String ("OK", "Bad Request", "Not Found", "Internal Server Error", or "Unknown" for unrecognized codes)
+     */
     private String getStatusMessage(int statusCode) {
         return switch (statusCode) {
             case 200 -> "OK";

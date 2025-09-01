@@ -15,10 +15,17 @@
     </properties>
 
     <dependencies>
-        <!-- JUnit 5 -->
+        <!-- JUnit 5 (API + Engine) -->
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter</artifactId>
+            <version>5.9.3</version>
+            <scope>test</scope>
+        </dependency>
+        <!-- JUnit 5 Parameterized Tests -->
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-params</artifactId>
             <version>5.9.3</version>
             <scope>test</scope>
         </dependency>
@@ -52,7 +59,7 @@
                 <configuration>
                     <archive>
                         <manifest>
-                                    <mainClass>com.escuelaing.arep.RestApiDemo</mainClass>
+                                    <mainClass>com.escuelaing.arep.HttpServer</mainClass>
                         </manifest>
                     </archive>
                 </configuration>
@@ -70,7 +77,7 @@
                         <configuration>
                             <transformers>
                                 <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                            <mainClass>com.escuelaing.arep.RestApiDemo</mainClass>
+                            <mainClass>com.escuelaing.arep.HttpServer</mainClass>
                                 </transformer>
                             </transformers>
                         </configuration>

@@ -1,4 +1,4 @@
-package com.escuelaing.arep;
+package com.escuelaing.arep.http;
 
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;

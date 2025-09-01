@@ -5,6 +5,7 @@ import java.io.IOException;
 import static com.escuelaing.arep.WebApp.get;
 import static com.escuelaing.arep.WebApp.start;
 import static com.escuelaing.arep.WebApp.staticfiles;
+import com.escuelaing.arep.framework.RouteHandler;
 
 /**
  * Web framework demonstration application showcasing REST API capabilities.
@@ -51,20 +52,20 @@ public class RestApiDemo {
         staticfiles("/static");
         
         // Define REST services using lambda functions
-        get("/hello", (req, resp) -> {
+        RouteHandler helloHandler = (req, resp) -> {
             String name = req.getValues("name");
             if (name.isEmpty()) {
                 name = "World";
             }
             return "Hello " + name + "!";
-        });
+        };
+        get("/hello", helloHandler);
         
-        get("/pi", (req, resp) -> {
-            return String.valueOf(Math.PI);
-        });
+        RouteHandler piHandler = (req, resp) -> String.valueOf(Math.PI);
+        get("/pi", piHandler);
         
         // Additional example: parameterized greeting with multiple parameters
-        get("/greet", (req, resp) -> {
+        RouteHandler greetHandler = (req, resp) -> {
             String name = req.getValues("name");
             String lang = req.getValues("lang");
             
@@ -78,10 +79,11 @@ public class RestApiDemo {
             };
             
             return greeting;
-        });
+        };
+        get("/greet", greetHandler);
         
         // Example with JSON response
-        get("/info", (req, resp) -> {
+        RouteHandler infoHandler = (req, resp) -> {
             resp.type("application/json");
             return String.format("""
                 {
@@ -97,7 +99,8 @@ public class RestApiDemo {
                     ]
                 }
                 """, java.time.Instant.now().toString());
-        });
+        };
+        get("/info", infoHandler);
         
         // Start the REST API application
         System.out.println("Starting REST API Demo Application...");

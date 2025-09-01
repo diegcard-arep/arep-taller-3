@@ -34,40 +34,53 @@ A complete HTTP server implemented from scratch in Java, with an integrated web 
 |------------|----------|-------------|
 | **HttpServer** | `HttpServer.java` | Base HTTP server that handles connections, routing, and MIME types |
 | **WebApp Framework** | `WebApp.java` | High-level web framework for defining routes and services |
-| **Request/Response** | `Request.java`, `Response.java` | HTTP encapsulation objects |
+| **Request/Response** | `http/Request.java`, `http/Response.java` | HTTP encapsulation objects |
+| **Router/RouteHandler** | `framework/Router.java`, `framework/RouteHandler.java` | Centralized route registry and handler interface |
+| **Reflection RouteInfo** | `framework/RouteInfo.java` | Reflection-based route info (MicroSpringBoot)
 | **Demo Application** | `RestApiDemo.java` | Framework demo application |
 | **Configuration** | `ServerConfig.java` | Centralized server configuration |
 
 ## Project Structure
 
 ```
-arep-taller-2/
+arep-taller-3/
 ├── src/
-│ ├── main/
-│ │ ├── java/com/escuelaing/arep/
-│ │ │ ├── HttpServer.java # Main HTTP Server
-│ │ │ ├── WebApp.java # Web Framework
-│ │ │ ├── Request.java # HTTP Request Object
-│ │ │ ├── Response.java # HTTP Response Object
-│ │ │ ├── RouteHandler.java # Interface for handlers
-│ │ │ ├── RestApiDemo.java # Demo application
-│ │ │ └── config/
-│ │ │ └── ServerConfig.java # Server configuration
-│ │ └── resources/
-│ │ └── static/ # Static web files
-│ │ ├── index.html # Home page
-│ │ ├── styles.css # CSS styles
-│ │ ├── app.js # Client-side logic
-│ │ └── logo.svg # App logo
-│ └── test/
-│ └── java/com/escuelaing/arep/
-│ └── HttpServerTest.java # Unit tests
-├── target/ # Maven output
-├── Dockerfile # Docker configuration
-├── docker-compose.yml # Compose for development
-├── pom.xml # Maven configuration
-├── README.md # This file
-└── LICENSE.md # MIT License
+│   ├── main/
+│   │   ├── java/com/escuelaing/arep/
+│   │   │   ├── HttpServer.java           # Core HTTP Server
+│   │   │   ├── WebApp.java               # Minimalist Web Framework
+│   │   │   ├── ClassScanner.java         # Classpath scanning for controllers
+│   │   │   ├── RestApiDemo.java          # Demo application (main)
+│   │   │   ├── config/
+│   │   │   │   └── ServerConfig.java     # Server configuration
+│   │   │   ├── annotations/
+│   │   │   │   ├── GetMapping.java
+│   │   │   │   ├── RequestParam.java
+│   │   │   │   └── RestController.java
+│   │   │   ├── controllers/              # REST Controllers (MicroSpringBoot)
+│   │   │   │   ├── GreetingController.java
+│   │   │   │   └── HelloController.java
+│   │   │   ├── framework/
+│   │   │   │   ├── Router.java           # Centralized route registry for WebApp
+│   │   │   │   ├── RouteHandler.java     # Functional interface for handlers
+│   │   │   │   └── RouteInfo.java        # Reflection-based route management
+│   │   │   └── http/                     # HTTP transport layer
+│   │   │       ├── Request.java
+│   │   │       └── Response.java
+│   │   └── resources/
+│   │       └── static/                   # Static web assets
+│   │           ├── index.html
+│   │           ├── styles.css
+│   │           ├── app.js
+│   │           └── logo.svg
+│   └── test/
+│       └── java/com/escuelaing/arep/
+│           └── HttpServerTest.java       # Unit tests
+├── Dockerfile
+├── docker-compose.yml
+├── pom.xml
+├── README.md
+└── LICENSE.md
 ```
 
 ## 🚀 Quick Start
@@ -84,8 +97,8 @@ arep-taller-2/
 
 ```bash
 # Clone and compile
-git clone https://github.com/diegcard-arep/arep-taller-2.git
-cd arep-taller-2
+git clone https://github.com/diegcard-arep/arep-taller-3.git
+cd arep-taller-3
 mvn clean compile
 ```
 
@@ -105,8 +118,8 @@ java -cp target/urlobject-1.0-SNAPSHOT.jar com.escuelaing.arep.RestApiDemo
 docker-compose up --build
 
 # Or manually
-docker build -t arep-taller-2 .
-docker run -p 35000:35000 arep-taller-2
+docker build -t arep-taller-3 .
+docker run -p 35000:35000 arep-taller-3
 ```
 
 #### Option 3: Executable JAR
@@ -138,24 +151,24 @@ http://localhost:35000
 import static com.escuelaing.arep.WebApp.*;
 
 public class MyApplication { 
-public static void main(String[] args) { 
-// Configure static files 
-staticfiles("/static"); 
+  public static void main(String[] args) { 
+    // Configure static files 
+    staticfiles("/static"); 
 
-// Define REST routes 
-get("/hello", (req, resp) -> { 
-String name = req.getValues("name"); 
-return "Hello " + (name.isEmpty() ? "World" : name) + "!"; 
-}); 
+    // Define REST routes 
+    get("/hello", (req, resp) -> { 
+      String name = req.getValues("name"); 
+      return "Hello " + (name.isEmpty() ? "World" : name) + "!"; 
+    }); 
 
-get("/api/data", (req, resp) -> { 
-resp.type("application/json"); 
-return "{\"message\": \"Hello from API\"}"; 
-}); 
+    get("/api/data", (req, resp) -> { 
+      resp.type("application/json"); 
+      return "{\"message\": \"Hello from API\"}"; 
+    }); 
 
-// Start server 
-start(); 
-}
+    // Start server 
+    start(); 
+  }
 }
 ```
 ### Framework Features
@@ -259,7 +272,7 @@ Tests include:
 docker-compose up --build
 
 # Manual build
-docker build -t arep-taller-2 .
+docker build -t arep-taller-3 .
 ```
 
 ### Dockerfile Features
@@ -307,7 +320,7 @@ docker-compose build --no-cache
 
 1. **Receive**: `HttpServer` receives the connection
 2. **Parsing**: Extracts method, route, and HTTP headers
-3. **Routing**: `WebApp` verifies registered routes
+3. **Routing**: `WebApp`/`Router` verifies registered routes
 4. **Processing**: Executes handler or serve a static file
 5. **Response**: Sends an HTTP response with appropriate headers
 
@@ -335,71 +348,10 @@ staticfiles("/public");
 
 // Routes with multiple parameters
 get("/user", (req, resp) -> { 
-String name = req.getValues("name"); 
-String age = req.getValues("age"); 
-return "User: " + name + ", Age: " + age;
+  String name = req.getValues("name"); 
+  String age = req.getValues("age"); 
+  return "User: " + name + ", Age: " + age;
 });
-```
-
-## � Development and Contribution
-
-### Class Structure
-
-```text
-HttpServer (Core)
-├── TCP Connection Handling
-├── HTTP Parsing
-├── Static File Serving
-└── Framework Integration
-
-WebApp (Framework)
-├── Route Registration
-├── Handler Management
-├── Static Configuration
-└── Server Lifecycle
-
-Request/Response
-├── HTTP Encapsulation
-├── Parameter Parsing
-├── Header Configuration
-└── Content Types
-```
-
-## 🚨 Troubleshooting
-
-### Common Problems
-
-#### Port in use
-
-```bash
-# Check processes on port 35000
-lsof -i :35000
-kill -9 <PID>
-```
-
-#### Compilation Errors
-
-```bash
-# Clean and recompile
-mvn clean install
-```
-
-#### Docker Problems
-
-```bash
-# Clean containers
-docker system prune -a
-```
-
-### Debug Logs
-
-The server includes detailed debugging logs:
-
-```text
-INFO: HTTP Server started on port 35000
-INFO: Serving files from: /path/to/static
-INFO: Request: GET /App/hello?name=Diego
-INFO: Framework route handled: /App/hello
 ```
 
 ## 👨‍💻 Author
@@ -413,7 +365,7 @@ This project is licensed under the MIT License - see [LICENSE.md](LICENSE.md) fo
 ## 🎓 Academic Context
 
 **Julio Garavito Colombian School of Engineering**
-**Enterprise Architectures (AREP) - Workshop 2**
+**Enterprise Architectures (AREP) - Workshop 3**
 
 ### Learning Objectives
 

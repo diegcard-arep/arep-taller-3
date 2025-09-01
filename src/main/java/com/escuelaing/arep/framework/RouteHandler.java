@@ -1,4 +1,7 @@
-package com.escuelaing.arep;
+package com.escuelaing.arep.framework;
+
+import com.escuelaing.arep.http.Request;
+import com.escuelaing.arep.http.Response;
 
 /**
  * Functional interface for handling HTTP route requests.

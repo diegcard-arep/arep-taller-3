@@ -1,14 +1,14 @@
-package com.escuelaing.arep;
+package com.escuelaing.arep.framework;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.util.Map;
 
 public class RouteInfo {
-    private String path;
-    private Method method;
-    private Object controllerInstance;
-    private Parameter[] parameters;
+    private final String path;
+    private final Method method;
+    private final Object controllerInstance;
+    private final Parameter[] parameters;
     
     public RouteInfo(String path, Method method, Object controllerInstance) {
         this.path = path;

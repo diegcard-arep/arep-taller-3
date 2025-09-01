@@ -6,6 +6,9 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.escuelaing.arep.framework.RouteHandler;
+import com.escuelaing.arep.framework.Router;
+
 /**
  * Main framework class that provides static methods for defining REST services
  * and configuring static file locations. This class serves as the main entry
@@ -18,6 +21,7 @@ public class WebApp {
     
     private static final Logger LOGGER = Logger.getLogger(WebApp.class.getName());
     
+    // Mantener por compatibilidad, pero delegar al Router
     private static final Map<String, RouteHandler> routes = new HashMap<>();
     private static String staticFilesDirectory = "/webroot";
     private static HttpServer server;
@@ -33,6 +37,7 @@ public class WebApp {
     public static void get(String path, RouteHandler handler) {
         String fullPath = DEFAULT_ROUTE_PREFIX + path;
         routes.put(fullPath, handler);
+        Router.register(fullPath, handler);
         LOGGER.log(Level.INFO, "Registered GET route: {0}", fullPath);
     }
     
@@ -55,7 +60,8 @@ public class WebApp {
      * @return the RouteHandler for the path, or null if not found
      */
     public static RouteHandler getRoute(String path) {
-        return routes.get(path);
+        RouteHandler handler = Router.get(path);
+        return handler != null ? handler : routes.get(path);
     }
     
     /**
@@ -105,6 +111,7 @@ public class WebApp {
      */
     public static void clearRoutes() {
         routes.clear();
+        Router.clear();
         LOGGER.log(Level.INFO, "All routes cleared");
     }
 }

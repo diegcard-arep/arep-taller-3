@@ -1,28 +1,40 @@
 package com.escuelaing.arep;
 
-import com.escuelaing.arep.annotations.RestController;
 import java.io.File;
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.net.URL;
+import java.net.URLDecoder;
 import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import com.escuelaing.arep.annotations.RestController;
 
 public class ClassScanner {
     
+    private static final Logger LOGGER = Logger.getLogger(ClassScanner.class.getName());
+
     public static List<Class<?>> findRestControllers(String packageName) {
         List<Class<?>> controllers = new ArrayList<>();
         try {
             String path = packageName.replace('.', '/');
             ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
-            URL resource = classLoader.getResource(path);
-            
-            if (resource != null) {
-                File directory = new File(resource.getFile());
-                if (directory.exists()) {
-                    scanDirectory(directory, packageName, controllers);
+            Enumeration<URL> resources = classLoader.getResources(path);
+            while (resources.hasMoreElements()) {
+                URL resource = resources.nextElement();
+                if ("file".equals(resource.getProtocol())) {
+                    File directory = new File(decode(resource.getFile()));
+                    if (directory.exists()) {
+                        scanDirectory(directory, packageName, controllers);
+                    }
                 }
+                // Nota: escaneo dentro de JARs no implementado por simplicidad
             }
-        } catch (Exception e) {
-            e.printStackTrace();
+        } catch (IOException e) {
+            LOGGER.log(Level.WARNING, "Error leyendo recursos para paquete {0}: {1}", new Object[]{packageName, e.getMessage()});
         }
         return controllers;
     }
@@ -42,9 +54,14 @@ public class ClassScanner {
                         }
                     } catch (ClassNotFoundException e) {
                         // Ignorar clases que no se pueden cargar
+                        LOGGER.log(Level.FINE, "Clase no encontrada durante el escaneo: {0}", className);
                     }
                 }
             }
         }
+    }
+
+    private static String decode(String path) throws UnsupportedEncodingException {
+        return URLDecoder.decode(path, java.nio.charset.StandardCharsets.UTF_8);
     }
 }

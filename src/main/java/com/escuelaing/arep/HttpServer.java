@@ -19,6 +19,9 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.escuelaing.arep.config.ServerConfig;
+import com.escuelaing.arep.framework.RouteHandler;
+import com.escuelaing.arep.http.Request;
+import com.escuelaing.arep.http.Response;
 
 /**
  * HTTP Server that handles multiple sequential requests and serves static
@@ -198,7 +201,7 @@ public class HttpServer {
             
             LOGGER.log(Level.INFO, "Framework route handled: {0}", path);
             
-        } catch (Exception e) {
+        } catch (RuntimeException e) {
             LOGGER.log(Level.SEVERE, "Error handling framework route: {0}", e.getMessage());
             sendErrorResponse(out, 500, "Internal Server Error");
         }

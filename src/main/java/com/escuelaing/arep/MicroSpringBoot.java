@@ -1,16 +1,26 @@
 package com.escuelaing.arep;
 
-import com.escuelaing.arep.annotations.RestController;
-import com.escuelaing.arep.annotations.GetMapping;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Method;
-import java.io.*;
-import java.net.*;
-import java.util.*;
+import java.net.ServerSocket;
+import java.net.Socket;
+import java.net.URLDecoder;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+
+import com.escuelaing.arep.annotations.GetMapping;
+import com.escuelaing.arep.annotations.RestController;
+import com.escuelaing.arep.framework.RouteInfo;
 
 public class MicroSpringBoot {
     private static final int PORT = 8080;
-    private static Map<String, RouteInfo> routes = new ConcurrentHashMap<>();
+    private static final Map<String, RouteInfo> routes = new ConcurrentHashMap<>();
     
     public static void main(String[] args) throws Exception {
         if (args.length > 0) {
@@ -35,7 +45,7 @@ public class MicroSpringBoot {
     }
     
     private static void loadAllControllers() {
-        List<Class<?>> controllers = ClassScanner.findRestControllers("com.escuelaing.arep");
+        List<Class<?>> controllers = ClassScanner.findRestControllers("com.escuelaing.arep.controllers");
         for (Class<?> controllerClass : controllers) {
             try {
                 registerController(controllerClass);
@@ -59,16 +69,17 @@ public class MicroSpringBoot {
     }
     
     private static void startServer() throws IOException {
-        ServerSocket serverSocket = new ServerSocket(PORT);
-        System.out.println("Servidor iniciado en puerto " + PORT);
-        System.out.println("Rutas registradas:");
-        for (String path : routes.keySet()) {
-            System.out.println("  GET " + path);
-        }
-        
-        while (true) {
-            Socket clientSocket = serverSocket.accept();
-            handleRequest(clientSocket);
+        try (ServerSocket serverSocket = new ServerSocket(PORT)) {
+            System.out.println("Servidor iniciado en puerto " + PORT);
+            System.out.println("Rutas registradas:");
+            for (String path : routes.keySet()) {
+                System.out.println("  GET " + path);
+            }
+            
+            while (true) {
+                Socket clientSocket = serverSocket.accept();
+                handleRequest(clientSocket);
+            }
         }
     }
     
@@ -103,12 +114,12 @@ public class MicroSpringBoot {
             }
             
         } catch (IOException e) {
-            e.printStackTrace();
+            System.err.println("I/O error: " + e.getMessage());
         } finally {
             try {
                 clientSocket.close();
             } catch (IOException e) {
-                e.printStackTrace();
+                System.err.println("Error closing client socket: " + e.getMessage());
             }
         }
     }

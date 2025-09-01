@@ -1,9 +1,10 @@
-package com.escuelaing.arep;
+package com.escuelaing.arep.controllers;
 
-import com.escuelaing.arep.annotations.RestController;
+import java.util.concurrent.atomic.AtomicLong;
+
 import com.escuelaing.arep.annotations.GetMapping;
 import com.escuelaing.arep.annotations.RequestParam;
-import java.util.concurrent.atomic.AtomicLong;
+import com.escuelaing.arep.annotations.RestController;
 
 @RestController
 public class GreetingController {

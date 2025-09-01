@@ -52,7 +52,7 @@
                 <configuration>
                     <archive>
                         <manifest>
-                                    <mainClass>com.escuelaing.arep.RestApiDemo</mainClass>
+                                    <mainClass>com.escuelaing.arep.HttpServer</mainClass>
                         </manifest>
                     </archive>
                 </configuration>
@@ -70,7 +70,7 @@
                         <configuration>
                             <transformers>
                                 <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                            <mainClass>com.escuelaing.arep.RestApiDemo</mainClass>
+                            <mainClass>com.escuelaing.arep.HttpServer</mainClass>
                                 </transformer>
                             </transformers>
                         </configuration>

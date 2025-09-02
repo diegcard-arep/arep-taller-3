@@ -61,20 +61,13 @@ mvn clean compile
 
 ```bash
 # Run server (recommended)
-mvn exec:java -Dexec.mainClass="com.escuelaing.arep.RestApiDemo"
 
-# Alternatives
-java -cp target/classes com.escuelaing.arep.RestApiDemo
-java -cp target/urlobject-1.0-SNAPSHOT.jar com.escuelaing.arep.RestApiDemo
+java -cp target/classes com.escuelaing.arep.HttpServer
+
+# Other option: create a standalone JAR and run
+java -jar target/urlobject-1.0-SNAPSHOT.jar
 ```
 
-## Command line invocation example
-
-First version (manual POJO loading):
-
-```bash
-java -cp target/classes co.edu.escuelaing.reflexionlab.MicroSpringBoot co.edu.escuelaing.reflexionlab.FirstWebService
-```
 
 Final version (automatic discovery):
 
@@ -92,7 +85,7 @@ Compile and run with standalone JAR:
 
 ```bash
 mvn clean package
-java -jar target/urlobject-1.0-SNAPSHOT.jar
+java -cp target/classes com.escuelaing.arep.HttpServer
 ```
 
 Access in the browser:

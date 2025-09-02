@@ -1,117 +1,25 @@
-# WebApp Framework – Servidor HTTP minimalista en Java
+# WebApp Framework – Minimalist HTTP Server in Java
 
 ![Logo](src/main/resources/static/logo.svg)
 
-Un servidor HTTP secuencial implementado desde cero en Java 21, con soporte para archivos estáticos, descubrimiento de controladores por anotaciones y ruteo básico vía un micro-framework IoC (anotaciones @RestController, @GetMapping y @RequestParam).
+## Description and Objective
 
-> Objetivo académico: ejercicio de Arquitecturas Empresariales (AREP) – Taller 3.
+This project is a sequential web server implemented from scratch in Java 21, capable of delivering HTML pages and PNG images. It includes an IoC microframework that allows web applications to be built from POJOs using annotations (@RestController, @GetMapping, @RequestParam), demonstrating Java's reflective capabilities.
 
+> **Academic Objective:** Enterprise Architecture Exercise (AREP) – Workshop 3. The server must serve multiple non-concurrent requests and serve as a basis for exploring concepts of reflection, dependency injection, and dynamic routing in Java.
 
-## Características
+## Main Features
 
-- Servidor HTTP propio (sin frameworks externos)
-- Archivos estáticos con caché en memoria (hasta 1 MB por archivo)
-- Detección simple de MIME types (html, css, js, imágenes, svg, txt)
-- Rutas GET mediante controladores anotados (@RestController + @GetMapping)
-- Inyección de parámetros de consulta con @RequestParam (valores por defecto)
-- Manejo de errores básicos (400, 404, 500) y CORS abierto para GET/POST/OPTIONS
+- Custom HTTP server (no external frameworks)
+- Static file delivery (HTML, CSS, JS, PNG/SVG images)
+- Simple MIME type detection
+- IoC framework for annotated controllers
+- Automatic controller discovery (@RestController)
+- GET routes using @GetMapping and parameters using @RequestParam
+- Example of a web application built on the framework
+- Basic error handling (400, 404, 500) and open CORS for GET/POST/OPTIONS
 
-> [!NOTE]
-> El ruteo actual es secuencial y soporta únicamente GET por anotaciones. Los formularios de la UI incluyen ejemplos “simulados” para POST y endpoints /api/* que aún no están implementados en el servidor.
-
-
-## Arquitectura
-
-![Arquitectura](img/diagram.png)
-
-Componentes clave:
-
-- `HttpServer`: servidor, manejo de peticiones, ruteo y archivos estáticos
-- `config/ServerConfig`: configuración (puerto, directorio estático)
-- `utils/ClassScanner`: escaneo de clases anotadas en el classpath
-- `framework/RouteInfo`: invocación por reflexión de métodos anotados
-- `annotations/*`: anotaciones simples para construir el micro-framework
-- `controllers/*`: controladores de ejemplo
-
-
-## Estructura del proyecto
-
-```text
-arep-taller-3/
-├─ src/
-│  ├─ main/java/com/escuelaing/arep/
-│  │  ├─ HttpServer.java
-│  │  ├─ config/ServerConfig.java
-│  │  ├─ utils/ClassScanner.java
-│  │  ├─ annotations/{GetMapping, RequestParam, RestController}.java
-│  │  ├─ framework/{RouteInfo, RouteHandler, Router}.java
-│  │  └─ controllers/{HelloController, GreetingController}.java
-│  └─ main/resources/static/{index.html, styles.css, app.js, logo.svg}
-├─ Dockerfile
-├─ docker-compose.yml
-├─ pom.xml
-└─ README.md
-```
-
-
-## Requisitos
-
-- Java 21+
-- Maven 3.9+
-- Docker 24+ (opcional)
-
-
-## Inicio rápido
-
-Compilar y ejecutar con JAR autónomo:
-
-```bash
-mvn clean package
-java -jar target/urlobject-1.0-SNAPSHOT.jar
-```
-
-Accede en el navegador:
-
-```text
-http://localhost:35000
-```
-
-Ejecutar desde clase principal (IDE): `com.escuelaing.arep.HttpServer`.
-
-> [!TIP]
-> Los archivos estáticos se sirven desde `target/classes/static`. Asegúrate de compilar antes de ejecutar para que los recursos estén disponibles.
-
-
-## Docker
-
-Build y ejecución con Docker Compose:
-
-```bash
-docker-compose up --build
-```
-
-Build y ejecución manual:
-
-```bash
-docker build -t arep-taller-3 .
-docker run -p 35000:35000 --name arep-taller-3 arep-taller-3
-```
-
-> [!IMPORTANT]
-> El puerto se encuentra fijo en el código (`ServerConfig.PORT = 35000`). La variable de entorno `PORT` definida en el Dockerfile no se usa aún para configurar el servidor.
-
-
-## Endpoints implementados
-
-- GET `/hola` → saludo fijo de `HelloController`
-- GET `/greeting?name=TuNombre` → saludo personalizado (con `defaultValue = "World"`)
-- GET `/count` → contador incremental en memoria
-
-> [!NOTE]
-> La UI incluye botones para `/api/hello`, `/api/weather`, `/api/quote` como ejemplos de consumo; dichos endpoints no están implementados en el servidor y retornarán 404 hasta ser agregados.
-
-
-## Uso de las anotaciones (ejemplo)
+## Annotation Usage Example
 
 ```java
 import com.escuelaing.arep.annotations.GetMapping;
@@ -120,23 +28,114 @@ import com.escuelaing.arep.annotations.RestController;
 
 @RestController
 public class DemoController {
-    @GetMapping("/hello")
-    public String hello(@RequestParam(value = "name", defaultValue = "World") String name) {
-        return "Hello " + name;
-    }
+@GetMapping("/hello")
+public String hello(@RequestParam(value = "name", defaultValue = "World") String name) {
+return "Hello " + name;
+}
 }
 ```
 
-Cómo funciona:
+## Automatic Controller Discovery
 
-- `ClassScanner` detecta clases con `@RestController` bajo `com.escuelaing.arep.controllers`
-- `HttpServer` registra métodos `@GetMapping` y hace binding de parámetros con `@RequestParam`
-- El método se invoca por reflexión y la respuesta se serializa como texto plano
+The framework scans the classpath for classes annotated with @RestController and automatically registers methods annotated with @GetMapping. Parameters are injected using @RequestParam, allowing dynamic endpoints to be built without manual configuration.
 
 
-## Configuración
+## 🚀 Quick Start
 
-Cambiar el puerto del servidor:
+### Prerequisites
+
+- Java 21+
+- Maven 3.6+
+- Docker (optional for containerization)
+
+### Installation Methods and Execution
+
+#### Option 1: Direct Execution with Maven
+
+```bash
+# Clone and compile
+git clone https://github.com/diegcard-arep/arep-taller-3.git
+cd arep-taller-3
+mvn clean compile
+```
+
+```bash
+# Run server (recommended)
+mvn exec:java -Dexec.mainClass="com.escuelaing.arep.RestApiDemo"
+
+# Alternatives
+java -cp target/classes com.escuelaing.arep.RestApiDemo
+java -cp target/urlobject-1.0-SNAPSHOT.jar com.escuelaing.arep.RestApiDemo
+```
+
+## Command line invocation example
+
+First version (manual POJO loading):
+
+```bash
+java -cp target/classes co.edu.escuelaing.reflexionlab.MicroSpringBoot co.edu.escuelaing.reflexionlab.FirstWebService
+```
+
+Final version (automatic discovery):
+
+The framework detects and registers all controllers annotated in the classpath, without the need to specify them on the command line.
+
+## Requirements
+
+- Java 21+
+- Maven 3.9+
+- Docker 24+ (optional)
+
+## Quick Start
+
+Compile and run with standalone JAR:
+
+```bash
+mvn clean package
+java -jar target/urlobject-1.0-SNAPSHOT.jar
+```
+
+Access in the browser:
+
+```text
+http://localhost:35000
+```
+
+Run from main class (IDE): `com.escuelaing.arep.HttpServer`.
+
+> [!TIP]
+> Static files are served from `target/classes/static`. Make sure to compile before running so that the resources are available.
+
+## Docker
+
+Build and run with Docker Compose:
+
+```bash
+docker-compose up --build
+```
+
+Build and run manually:
+
+```bash
+docker build -t arep-taller-3 .
+docker run -p 35000:35000 --name arep-taller-3 arep-taller-3
+```
+
+> [!IMPORTANT]
+> The port is fixed in the code (`ServerConfig.PORT = 35000`). The `PORT` environment variable defined in the Dockerfile is not yet used to configure the server.
+
+## Implemented Endpoints
+
+- GET `/hello` → fixed `HelloController` greeting
+- GET `/greeting?name=YourName` → custom greeting (with `defaultValue = "World"`)
+- GET `/count` → incrementing counter in memory
+
+> [!NOTE]
+> The UI includes buttons for `/api/hello`, `/api/weather`, and `/api/quote` as consumption examples; these endpoints are not implemented on the server and will return 404 until added.
+
+## Configuration
+
+Change the server port:
 
 ```java
 import com.escuelaing.arep.config.ServerConfig;
@@ -144,17 +143,17 @@ import com.escuelaing.arep.config.ServerConfig;
 ServerConfig.setPort(8080);
 ```
 
-Cambiar el directorio de archivos estáticos en tiempo de ejecución:
+Change the static files directory at runtime:
 
 ```java
 import com.escuelaing.arep.HttpServer;
 
-HttpServer.setStaticFilesDirectory("/static"); // por defecto
-// o una ruta relativa alternativa
+HttpServer.setStaticFilesDirectory("/static"); // default
+// or an alternative relative path
 HttpServer.setStaticFilesDirectory("src/main/resources/static");
 ```
 
-MIME types soportados (simplificado):
+Supported MIME types (simplified):
 
 - html, htm → text/html
 - css → text/css
@@ -166,46 +165,62 @@ MIME types soportados (simplificado):
 - ico → image/x-icon
 - txt → text/plain
 
+## Tests
 
-## Pruebas
-
-Ejecutar pruebas unitarias:
+Running unit tests:
 
 ```bash
 mvn test
 ```
 
-Cobertura de pruebas (alto nivel):
+![Test Results](img/test_result.png)
 
-- Parsing de Request/Response
-- Descubrimiento de controladores y ruteo (`ClassScanner`, `RouteInfo`)
-- Controladores de ejemplo (`HelloController`, `GreetingController`)
-- Integración básica del `HttpServer`
+Test coverage (high level):
 
+- Request/Response parsing
+- Controller discovery and routing (`ClassScanner`, `RouteInfo`)
+- Example controllers (`HelloController`, `GreetingController`)
+- Basic `HttpServer` integration
 
-## Limitaciones actuales
+## Current Limitations
 
-- Concurrencia: servidor secuencial (un request a la vez)
-- Solo GET por anotaciones; POST/PUT/DELETE no implementados
-- Caché de archivos sin políticas LRU/LFU ni límites globales de memoria
-- No hay serialización JSON automática ni content negotiation
-- No escanea clases dentro de JARs
-- No hay hot-reload ni plantillas
+- Concurrency: sequential server (one request at a time)
+- Only GET for annotations; POST/PUT/DELETE not implemented
+- File caching without LRU/LFU policies or global memory limits
+- No automatic JSON serialization or content negotiation
+- No scanning of classes within JARs
+- No hot-reload or templates
 
+## Endpoint Testing (Postman)
 
-## Roadmap sugerido (mejoras)
+Screenshots of the tests performed with Postman for the deployed endpoints should be included below. You can add images of the responses for each endpoint, for example:
 
-- Soporte concurrente (thread-per-connection o pool de hilos)
-- Soporte a más métodos HTTP y cuerpo de petición (POST/PUT/DELETE)
-- Serialización JSON y tipos de contenido configurables
-- Middleware/filtros (logging, CORS, compresión Gzip, seguridad básica)
-- Configuración por variables de entorno (PORT, STATIC_DIR)
-- Cache con estrategia y límites configurables
-- Descubrimiento de controladores también desde JARs
-- Mapeo 404/500 personalizable y página de error
-- Integración CI y reporte de cobertura
+- **GET /hola**
+![Test /hola](img/hola_get.png)
+- **GET /greeting**
+![Test /greeting](img/greeting_get.png)
+- **GET /greeting?name=Diego**
+![Test /greeting](img/greeting_get_params.png)
+- **GET /count**
+![Test /count](img/count_get.png)
 
+## 👨‍💻 Author
 
-## Créditos
+**Diego Cardenas** - [diegcard](https://github.com/diegcard)
 
-Autor: Diego Cardenas — Escuela Colombiana de Ingeniería Julio Garavito — AREP
+## 📄 License
+
+This project is licensed under the MIT License - see [LICENSE.md](LICENSE.md) for details.
+
+## 🎓 Academic Context
+
+**Julio Garavito Colombian School of Engineering**
+**Enterprise Architectures (AREP) - Workshop 3**
+
+### Learning Objectives
+
+- Implementing HTTP servers from scratch
+- Developing minimalist web frameworks
+- Handling network protocols in Java
+- Containerization with Docker
+- Distributed architectures and microservices

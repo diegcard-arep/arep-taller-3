@@ -2,24 +2,49 @@
 
 ![Logo](src/main/resources/static/logo.svg)
 
-## Description and Objective
+## 📋 Overview
 
-This project is a sequential web server implemented from scratch in Java 21, capable of delivering HTML pages and PNG images. It includes an IoC microframework that allows web applications to be built from POJOs using annotations (@RestController, @GetMapping, @RequestParam), demonstrating Java's reflective capabilities.
+A lightweight, sequential HTTP server built from scratch in Java 21, featuring a custom IoC (Inversion of Control) microframework. This project demonstrates enterprise architecture principles by implementing a web server capable of serving static content and dynamic endpoints through annotation-based controllers.
 
-> **Academic Objective:** Enterprise Architecture Exercise (AREP) – Workshop 3. The server must serve multiple non-concurrent requests and serve as a basis for exploring concepts of reflection, dependency injection, and dynamic routing in Java.
+### 🎯 Academic Objective
 
-## Main Features
+**Enterprise Architecture Exercise (AREP) – Workshop 3**  
+*Julio Garavito Colombian School of Engineering*
 
-- Custom HTTP server (no external frameworks)
-- Static file delivery (HTML, CSS, JS, PNG/SVG images)
-- Simple MIME type detection
-- IoC framework for annotated controllers
-- Automatic controller discovery (@RestController)
-- GET routes using @GetMapping and parameters using @RequestParam
-- Example of a web application built on the framework
-- Basic error handling (400, 404, 500) and open CORS for GET/POST/OPTIONS
+This project explores fundamental concepts of web server implementation, reflection, dependency injection, and dynamic routing in Java, serving as a foundation for understanding distributed architectures and microservices.
 
-## Annotation Usage Example
+## ✨ Key Features
+
+### Core Server Capabilities
+- **Custom HTTP Server**: Built from scratch without external web frameworks
+- **Static Content Delivery**: Serves HTML, CSS, JavaScript, PNG, SVG, and other static assets
+- **MIME Type Detection**: Automatic content-type resolution
+- **Error Handling**: Comprehensive 400, 404, and 500 error responses
+- **CORS Support**: Open CORS policy for GET/POST/OPTIONS requests
+
+### IoC Microframework
+- **Annotation-Driven**: Uses `@RestController`, `@GetMapping`, and `@RequestParam`
+- **Automatic Discovery**: Scans classpath for annotated controllers
+- **Dependency Injection**: Parameter injection through annotations
+- **Dynamic Routing**: Routes are registered automatically at startup
+
+## 🏗️ Architecture
+
+### System Architecture
+![Architecture Diagram](img/arquitecture.png)
+
+### Request Flow
+![Flow Diagram](img/diagram_flow.png)
+
+The server follows a simple request-response cycle:
+1. Client sends HTTP request
+2. Server parses request and determines routing
+3. Static files are served directly or dynamic endpoints are invoked
+4. Response is formatted and sent back to client
+
+## 💡 Framework Usage
+
+### Creating Controllers
 
 ```java
 import com.escuelaing.arep.annotations.GetMapping;
@@ -28,175 +53,257 @@ import com.escuelaing.arep.annotations.RestController;
 
 @RestController
 public class DemoController {
-@GetMapping("/hello")
-public String hello(@RequestParam(value = "name", defaultValue = "World") String name) {
-return "Hello " + name;
-}
+    
+    @GetMapping("/hello")
+    public String hello(@RequestParam(value = "name", defaultValue = "World") String name) {
+        return "Hello " + name;
+    }
+    
+    @GetMapping("/api/status")
+    public String getStatus() {
+        return "Server is running";
+    }
 }
 ```
 
-## Automatic Controller Discovery
+### Automatic Controller Discovery
 
-The framework scans the classpath for classes annotated with @RestController and automatically registers methods annotated with @GetMapping. Parameters are injected using @RequestParam, allowing dynamic endpoints to be built without manual configuration.
+The framework uses reflection to:
+- Scan the classpath for `@RestController` annotated classes
+- Register methods annotated with `@GetMapping`
+- Configure parameter injection using `@RequestParam`
+- Build the routing table dynamically
 
+No manual configuration required – just add annotations and the framework handles the rest.
 
-## 🚀 Quick Start
+## 🚀 Getting Started
 
 ### Prerequisites
 
-- Java 21+
-- Maven 3.6+
-- Docker (optional for containerization)
+- **Java 21+** (Required)
+- **Maven 3.6+** (Build tool)
+- **Docker 24+** (Optional, for containerization)
 
-### Installation Methods and Execution
+### Installation & Execution
 
-#### Option 1: Direct Execution with Maven
+#### Method 1: Maven Direct Execution (Recommended)
 
 ```bash
-# Clone and compile
+# Clone the repository
 git clone https://github.com/diegcard-arep/arep-taller-3.git
 cd arep-taller-3
+
+# Compile the project
 mvn clean compile
+
+# Run the server
+java -cp target/classes com.escuelaing.arep.HttpServer
 ```
 
+#### Method 2: Standalone JAR
+
 ```bash
-# Run server (recommended)
+# Build JAR package
+mvn clean package
 
-java -cp target/classes com.escuelaing.arep.HttpServer
-
-# Other option: create a standalone JAR and run
+# Run from JAR
 java -jar target/urlobject-1.0-SNAPSHOT.jar
 ```
 
-
-Final version (automatic discovery):
-
-The framework detects and registers all controllers annotated in the classpath, without the need to specify them on the command line.
-
-## Requirements
-
-- Java 21+
-- Maven 3.9+
-- Docker 24+ (optional)
-
-## Quick Start
-
-Compile and run with standalone JAR:
+#### Method 3: Docker Deployment
 
 ```bash
-mvn clean package
-java -cp target/classes com.escuelaing.arep.HttpServer
-```
-
-Access in the browser:
-
-```text
-http://localhost:35000
-```
-
-Run from main class (IDE): `com.escuelaing.arep.HttpServer`.
-
-> [!TIP]
-> Static files are served from `target/classes/static`. Make sure to compile before running so that the resources are available.
-
-## Docker
-
-Build and run with Docker Compose:
-
-```bash
+# Using Docker Compose (Recommended)
 docker-compose up --build
-```
 
-Build and run manually:
-
-```bash
+# Or build and run manually
 docker build -t arep-taller-3 .
 docker run -p 35000:35000 --name arep-taller-3 arep-taller-3
 ```
 
-> [!IMPORTANT]
-> The port is fixed in the code (`ServerConfig.PORT = 35000`). The `PORT` environment variable defined in the Dockerfile is not yet used to configure the server.
+### Accessing the Application
 
-## Implemented Endpoints
+Once started, access the application at:
+```
+http://localhost:35000
+```
 
-- GET `/hello` → fixed `HelloController` greeting
-- GET `/greeting?name=YourName` → custom greeting (with `defaultValue = "World"`)
-- GET `/count` → incrementing counter in memory
+> [!TIP]
+> Static files are served from `target/classes/static`. Ensure you compile the project before running so resources are available in the classpath.
 
-> [!NOTE]
-> The UI includes buttons for `/api/hello`, `/api/weather`, and `/api/quote` as consumption examples; these endpoints are not implemented on the server and will return 404 until added.
+## 🔧 Configuration
 
-## Configuration
-
-Change the server port:
+### Server Port Configuration
 
 ```java
 import com.escuelaing.arep.config.ServerConfig;
 
+// Change default port (35000)
 ServerConfig.setPort(8080);
 ```
 
-Change the static files directory at runtime:
+### Static Files Directory
 
 ```java
 import com.escuelaing.arep.HttpServer;
 
-HttpServer.setStaticFilesDirectory("/static"); // default
-// or an alternative relative path
+// Default static directory
+HttpServer.setStaticFilesDirectory("/static");
+
+// Alternative path
 HttpServer.setStaticFilesDirectory("src/main/resources/static");
 ```
 
-Supported MIME types (simplified):
+### Supported MIME Types
 
-- html, htm → text/html
-- css → text/css
-- js → application/javascript
-- png → image/png
-- jpg, jpeg → image/jpeg
-- gif → image/gif
-- svg → image/svg+xml
-- ico → image/x-icon
-- txt → text/plain
+| Extension | MIME Type |
+|-----------|-----------|
+| html, htm | text/html |
+| css | text/css |
+| js | application/javascript |
+| png | image/png |
+| jpg, jpeg | image/jpeg |
+| gif | image/gif |
+| svg | image/svg+xml |
+| ico | image/x-icon |
+| txt | text/plain |
 
-## Tests
+## 🛣️ Available Endpoints
 
-Running unit tests:
+### Implemented Routes
+
+| Method | Endpoint | Description | Parameters |
+|--------|----------|-------------|------------|
+| GET | `/hello` | Basic greeting message | None |
+| GET | `/greeting` | Customizable greeting | `name` (optional, default: "World") |
+| GET | `/count` | Incrementing counter | None |
+
+### Example Requests
 
 ```bash
-mvn test
+# Basic greeting
+curl http://localhost:35000/hello
+
+# Custom greeting
+curl http://localhost:35000/greeting?name=Diego
+
+# Counter endpoint
+curl http://localhost:35000/count
 ```
 
+> [!NOTE]
+> The UI includes buttons for `/api/hello`, `/api/weather`, and `/api/quote` as demonstration examples. These endpoints return 404 until implemented.
+
+## 🧪 Testing
+
+### Running Tests
+
+```bash
+# Execute unit tests
+mvn test
+
+# Run with coverage report
+mvn test jacoco:report
+```
+
+### Test Results
 ![Test Results](img/test_result.png)
 
-Test coverage (high level):
+### Test Coverage Areas
 
-- Request/Response parsing
-- Controller discovery and routing (`ClassScanner`, `RouteInfo`)
-- Example controllers (`HelloController`, `GreetingController`)
-- Basic `HttpServer` integration
+- **Request/Response Processing**: HTTP parsing and response generation
+- **Controller Discovery**: `ClassScanner` and `RouteInfo` functionality  
+- **Routing System**: Dynamic endpoint registration and invocation
+- **Controller Examples**: `HelloController` and `GreetingController` validation
+- **Server Integration**: Basic `HttpServer` functionality
 
-## Current Limitations
+## 📊 API Testing with Postman
 
-- Concurrency: sequential server (one request at a time)
-- Only GET for annotations; POST/PUT/DELETE not implemented
-- File caching without LRU/LFU policies or global memory limits
-- No automatic JSON serialization or content negotiation
-- No scanning of classes within JARs
-- No hot-reload or templates
+Comprehensive endpoint testing performed with Postman:
 
-## Endpoint Testing (Postman)
-
-Screenshots of the tests performed with Postman for the deployed endpoints should be included below. You can add images of the responses for each endpoint, for example:
-
-- **GET /hola**
+### GET /hola
 ![Test /hola](img/hola_get.png)
-- **GET /greeting**
+
+### GET /greeting (Default)
 ![Test /greeting](img/greeting_get.png)
-- **GET /greeting?name=Diego**
+
+### GET /greeting with Parameters
 ![Test /greeting](img/greeting_get_params.png)
-- **GET /count**
+
+### GET /count
 ![Test /count](img/count_get.png)
 
+## ⚠️ Current Limitations
+
+### Known Constraints
+- **Concurrency**: Sequential processing (one request at a time)
+- **HTTP Methods**: Only GET mapping implemented (POST/PUT/DELETE pending)
+- **File Caching**: Basic caching without LRU/LFU policies or memory limits
+- **Content Negotiation**: No automatic JSON serialization
+- **JAR Scanning**: Cannot discover classes within JAR files
+- **Development Features**: No hot-reload or template engine support
+
+### Future Enhancements
+- Multi-threaded request handling
+- Complete HTTP method support
+- Advanced caching strategies
+- JSON/XML content negotiation
+- Template engine integration
+- Configuration file support
+
+## 🎓 Learning Outcomes
+
+This project demonstrates proficiency in:
+
+- **Network Programming**: Low-level HTTP protocol implementation
+- **Reflection API**: Dynamic class discovery and method invocation
+- **Annotation Processing**: Custom annotation framework development
+- **Design Patterns**: IoC container and dependency injection
+- **Containerization**: Docker deployment strategies
+- **Testing**: Unit testing with Maven and JUnit
+
+## 🛠️ Development Setup
+
+### IDE Configuration
+
+Run the main class directly in your IDE:
+```
+Main Class: com.escuelaing.arep.HttpServer
+```
+
+### Project Structure
+
+```
+src/
+├── main/
+│   ├── java/com/escuelaing/arep/
+│   │   ├── annotations/          # Custom annotations
+│   │   ├── config/              # Server configuration
+│   │   ├── controllers/         # Example controllers
+│   │   ├── scanner/             # Class discovery
+│   │   └── HttpServer.java      # Main server class
+│   └── resources/
+│       └── static/              # Static web content
+└── test/                        # Unit tests
+```
+
+## 🐳 Docker Configuration
+
+> [!IMPORTANT]
+> The server port is currently hardcoded to `35000` in `ServerConfig.PORT`. The `PORT` environment variable in the Dockerfile is not yet integrated for dynamic port configuration.
+
+### Docker Compose
+
+```yaml
+version: '3.8'
+services:
+  webapp:
+    build: .
+    ports:
+      - "35000:35000"
+    environment:
+      - PORT=35000
+```
 ## 👨‍💻 Author
 
 **Diego Cardenas** - [diegcard](https://github.com/diegcard)
@@ -205,15 +312,7 @@ Screenshots of the tests performed with Postman for the deployed endpoints shoul
 
 This project is licensed under the MIT License - see [LICENSE.md](LICENSE.md) for details.
 
-## 🎓 Academic Context
+---
 
-**Julio Garavito Colombian School of Engineering**
-**Enterprise Architectures (AREP) - Workshop 3**
-
-### Learning Objectives
-
-- Implementing HTTP servers from scratch
-- Developing minimalist web frameworks
-- Handling network protocols in Java
-- Containerization with Docker
-- Distributed architectures and microservices
+**Enterprise Architectures (AREP) - Workshop 3**  
+*Julio Garavito Colombian School of Engineering*
